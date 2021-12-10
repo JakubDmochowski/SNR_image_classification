@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 from torch.utils.data import Dataset
-
+from torchvision.io import read_image
 
 class AnimalsDataset(Dataset):
     def __init__(self, annotations_file, img_dir, split="70/15/15", transform=None, target_transform=None):
@@ -19,7 +19,7 @@ class AnimalsDataset(Dataset):
 
     def __getitem__(self, idx):
         img_path = os.path.join(self.img_dir, self.img_labels.iloc[idx, 0])
-        image = img_path
+        image = read_image(img_path)
         label = self.img_labels.iloc[idx, 1]
         if self.transform:
             image = self.transform(image)
