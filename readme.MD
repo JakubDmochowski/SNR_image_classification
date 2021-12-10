@@ -5,6 +5,8 @@ Setup:
 - with command: kaggle datasets download -d viratkothari/animal10
 - by hand: https://www.kaggle.com/viratkothari/animal10 => download
 
+and place it in folder /datasets/Animal-10
+
 2. Prepare python (3.9.5+):
 
 - python -m pip install -r requirements.txt
