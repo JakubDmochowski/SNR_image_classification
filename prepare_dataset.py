@@ -1,6 +1,7 @@
-import os
 import argparse
 import csv
+import os
+import pickle
 
 
 def main():
@@ -28,17 +29,25 @@ def main():
         "test": int(s[1]),
         "validation": int(s[2])
     }
+
+    classes = {}
     for idx, c in enumerate(os.listdir(args.directory)):
+        classes[idx] = c
+
         images = os.listdir(f"{args.directory}\{c}")
         class_count = len(images)
         for imidx, filename in enumerate(images):
-            row = [f"{c}/{filename}", idx + 1]
+            row = [f"{c}/{filename}", idx]
             if imidx < class_count * splits["train"] / 100:
                 train_writer.writerow(row)
             elif imidx < class_count * (splits["train"] + splits["test"]) / 100:
                 test_writer.writerow(row)
             else:
                 validation_writer.writerow(row)
+
+    with open(f"{args.output}_utils", 'wb') as f:
+        pickle.dump(classes, f)
+
     train_f.close()
     test_f.close()
     validation_f.close()

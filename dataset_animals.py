@@ -1,8 +1,8 @@
 import os
+
 import pandas as pd
+from PIL import Image
 from torch.utils.data import Dataset
-from torchvision.io import read_image
-import torch
 
 
 class AnimalsDataset(Dataset):
@@ -16,12 +16,8 @@ class AnimalsDataset(Dataset):
 
     def __getitem__(self, idx):
         img_path = os.path.join(self.img_dir, self.img_labels.iloc[idx, 0])
-        image = read_image(img_path)
+        image = Image.open(img_path).convert('RGB')
         label = self.img_labels.iloc[idx, 1]
         if self.transform:
             image = self.transform(image)
-        if image.size()[0] == 4:
-            image = image[0:3, :, :]
-        # if self.target_transform:
-        #     label = self.target_transform(label)
         return image, label
