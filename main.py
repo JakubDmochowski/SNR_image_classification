@@ -1,37 +1,14 @@
-import os
 import torch
-from torchvision import datasets
-from dataset_animals import AnimalsDataset
-import matplotlib.pyplot as plt
-from torch.utils.data import DataLoader
-import torchvision.transforms as T
-from PIL import Image
 
-image_size = (224,224)
-transform = T.Compose([T.ToPILImage(), T.Resize(image_size), T.PILToTensor()])
+import ModelTrainer
+import Utils
 
-training_data = AnimalsDataset(
-    annotations_file=f"{os.getcwd()}/datasets/animals10_train",
-    img_dir=f"{os.getcwd()}/datasets/Animals-10",
-    split="70/15/15",
-    transform=transform
-)
-test_data = AnimalsDataset(
-    annotations_file=f"{os.getcwd()}/datasets/animals10_test",
-    img_dir=f"{os.getcwd()}/datasets/Animals-10",
-    split="70/15/15",
-    transform=transform
-)
-validation_data = AnimalsDataset(
-    annotations_file=f"{os.getcwd()}/datasets/animals10_validation",
-    img_dir=f"{os.getcwd()}/datasets/Animals-10",
-    split="70/15/15",
-    transform=transform
-)
+Utils.set_classes()
+train_data_loader, validation_data_loader, test_data_loader = Utils.prepare_data()
 
-train_dataloader = DataLoader(training_data, batch_size=64, shuffle=True)
-test_dataloader = DataLoader(test_data, batch_size=64, shuffle=True)
+model_trainer = ModelTrainer.ModelTrainer()
+model = model_trainer.train_resnet(train_data_loader, validation_data_loader, num_epochs=25)
+# model = torch.load('resnet1.pth')
+model.eval()
+Utils.predict_image(model, test_data_loader)
 
-train_features, train_labels = next(iter(train_dataloader))
-print(f"Feature batch shape: {train_features.size()}")
-print(f"Labels batch shape: {train_labels.size()}")
