@@ -112,3 +112,22 @@ def predict_image(model, data_loader):
     print("Test dataset Accuracy:", acc.cpu().detach().numpy())
     print("Test dataset Confusion_matrix \n", confusion_matrix.cpu().detach().numpy())
 
+def predict_image_svm(model, svm, data_loader):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    confusion_matrix = torch.zeros(len(classes), len(classes))
+    corrects = 0
+    for inputs, labels in data_loader:
+        inputs = inputs.to(device)
+        labels = labels.to(device)
+        model_outputs = model(inputs)
+        model_outputs = model_outputs.cpu()
+        labels = labels.to("cpu")
+        preds = svm.predict(model_outputs)
+        preds = torch.from_numpy(preds)
+        corrects += torch.sum(preds == labels.data)
+        for t, p in zip(labels.view(-1), preds.view(-1)):
+            confusion_matrix[t.long(), p.long()] += 1
+    acc = corrects.double() / len(data_loader.dataset)
+    print("Test dataset Accuracy:", acc.cpu().detach().numpy())
+    print("Test dataset Confusion_matrix \n", confusion_matrix.cpu().detach().numpy())
+
