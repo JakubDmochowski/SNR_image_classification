@@ -13,6 +13,12 @@ from torchvision import models
 
 import Utils
 
+class Identity(nn.Module):
+    def __init__(self):
+        super(Identity, self).__init__()
+        
+    def forward(self, x):
+        return x
 
 class ModelTrainer:
 
@@ -29,6 +35,8 @@ class ModelTrainer:
         # Freeze all parameters
         for param in model.parameters():
             param.requires_grad = False
+        model.layer4[0].conv2 = Identity()
+        model.layer4[1].conv1 = Identity()
 
         num_ftrs = model.fc.in_features
         # Override classifier part
