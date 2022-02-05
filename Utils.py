@@ -1,8 +1,7 @@
+import csv
 import os
 import pickle
 
-import matplotlib.pyplot as plt
-import numpy as np
 import torch
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
@@ -56,44 +55,21 @@ def prepare_data():
     return train_data_loader, validation_data_loader, test_data_loader
 
 
-def visualize_model(test_data_loader, model, device, num_images=6):
-    was_training = model.training
-    model.eval()
-    images_so_far = 0
-    fig = plt.figure()
+def get_all_data():
+    test_transform = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ])
 
-    with torch.no_grad():
-        for i, (inputs, labels) in enumerate(test_data_loader):
-            inputs = inputs.to(device)
-            labels = labels.to(device)
+    all_data = AnimalsDataset(
+        annotations_file=f"{os.getcwd()}/datasets/animals10_test",
+        img_dir=f"{os.getcwd()}/datasets/Animals-10",
+        transform=test_transform
+    )
 
-            outputs = model(inputs)
-            _, preds = torch.max(outputs, 1)
-
-            for j in range(inputs.size()[0]):
-                images_so_far += 1
-                ax = plt.subplot(num_images // 2, 2, images_so_far)
-                ax.axis('off')
-                ax.set_title('predicted: {}'.format(preds[j]))
-                imshow(inputs.cpu().data[j])
-
-                if images_so_far == num_images:
-                    model.train(mode=was_training)
-                    return
-        model.train(mode=was_training)
-
-
-def imshow(inp, title=None):
-    """Imshow for Tensor."""
-    inp = inp.numpy().transpose((1, 2, 0))
-    mean = np.array([0.485, 0.456, 0.406])
-    std = np.array([0.229, 0.224, 0.225])
-    inp = std * inp + mean
-    inp = np.clip(inp, 0, 1)
-    plt.imshow(inp)
-    if title is not None:
-        plt.title(title)
-    plt.pause(0.001)  # pause a bit so that plots are updated
+    return DataLoader(all_data, batch_size=1, shuffle=False)
 
 
 def predict_image(model, data_loader):
@@ -111,4 +87,13 @@ def predict_image(model, data_loader):
     acc = corrects.double() / len(data_loader.dataset)
     print("Test dataset Accuracy:", acc.cpu().detach().numpy())
     print("Test dataset Confusion_matrix \n", confusion_matrix.cpu().detach().numpy())
+
+
+def save_wrong_predicted(wrong_predicted_ids):
+    file = open(f"{os.getcwd()}/datasets/wrong_predicted", 'w', encoding='UTF8', newline='')
+    writer = csv.writer(file)
+    for id in enumerate(wrong_predicted_ids):
+        writer.writerow(id)
+
+    file.close()
 
