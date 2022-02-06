@@ -1,4 +1,6 @@
 datasets/**
+models/
+plots/
 venv
 .idea
 .idea/
