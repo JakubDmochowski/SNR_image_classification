@@ -1,4 +1,6 @@
 datasets/**
+models/
+plots/
 venv
 .idea
 .idea/
@@ -7,4 +9,8 @@ __pycache__
 __pycache__/
 __pycache__/*
 resnet1.pth
+images
+images/*
+images_1
+images_1/*
 

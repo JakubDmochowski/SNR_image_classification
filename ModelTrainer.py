@@ -7,9 +7,11 @@ import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from sklearn import svm
 from torch.optim import lr_scheduler
 from torch.utils.data import DataLoader
 from torchvision import models
+import pickle
 
 import Utils
 
@@ -29,6 +31,8 @@ class ModelTrainer:
         # Freeze all parameters
         for param in model.parameters():
             param.requires_grad = False
+
+        model.layer4.requires_grad_(True)
 
         num_ftrs = model.fc.in_features
         # Override classifier part
@@ -56,6 +60,17 @@ class ModelTrainer:
         plt.show()
         plt.ioff()
         plt.show()
+
+        plt.savefig('plots/loss.png')
+
+        plt.plot(self.training_accuracy, label='Training accuracy')
+        plt.plot(self.validation_accuracy, label='Validation accuracy')
+        plt.legend(frameon=False)
+        plt.show()
+        plt.ioff()
+        plt.show()
+
+        plt.savefig('plots/acc.png')
 
         return self.model
 
@@ -114,10 +129,10 @@ class ModelTrainer:
                 # Save statistics
                 if phase == 'train':
                     self.training_loss.append(epoch_loss)
-                    self.training_accuracy.append(epoch_acc)
+                    self.training_accuracy.append(epoch_acc.cpu())
                 else:
                     self.validation_loss.append(epoch_loss)
-                    self.validation_accuracy.append(epoch_acc)
+                    self.validation_accuracy.append(epoch_acc.cpu())
 
                 print('{} Loss: {:.4f} Acc: {:.4f}'.format(phase, epoch_loss, epoch_acc))
 
